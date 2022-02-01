@@ -11,10 +11,12 @@ With this library we are going to manage the inputs that the [LeapMotion](https:
 1. Install the [LeapMotion SDK](https://developer.leapmotion.com/tracking-software-download), choosing the OS you are using.
     ![img_tutorial](./img/img_tutorial.jpeg)
 
-2. After extracting the file, install the .deb / .exe / .dmg program present in the downloaded folder
-    ![video_tutorial](./img/tutorial.gif)
+2. After extracting the file, install the .deb / .exe / .dmg program present in the downloaded folder.
 
 3. Create an IntelliJ idea project, following the steps in the video below
+    ![video_tutorial](./img/tutorial.gif)
+
+
 
     #### This is the code used in the video
 
