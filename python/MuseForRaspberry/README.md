@@ -6,10 +6,8 @@ A Python package for streaming, visualizing, and recording EEG data from the Mus
 
 ## Requirements
 
-The code relies on [pygatt](https://github.com/peplin/pygatt) or [BlueMuse](https://github.com/kowalej/BlueMuse/tree/master/Dist) for BLE communication and works differently on different operating systems.
+The code relies on [pygatt](https://github.com/peplin/pygatt) for BLE communication.
 
-- Windows: On Windows 10, we recommend installing [BlueMuse](https://github.com/kowalej/BlueMuse/tree/master/Dist) and using its GUI to discover and connect to Muse devices. Alternatively, if you have a BLED112 dongle you can try Muse LSL's bgapi backend (`muselsl stream --backend bgapi`).
-- Mac: On Mac, a **BLED112 dongle is required**. The bgapi backend is required and will be used by default when running Muse LSL from the command line
 - Linux: No dongle required. However, you may need to run a command to enable root-level access to bluetooth hardware (see [Common Issues](#linux)). The pygatt backend is required and will be used by default from the command line. and make sure to read the 
 
 **Compatible with Python 2.7 and Python 3.x**
