@@ -35,19 +35,19 @@ On Windows 10, we recommend using the [BlueMuse](https://github.com/kowalej/Blue
 
 To print a list of available muses:
 
-    $ muselsl list
+    muselsl list
 
 To begin an LSL stream from the first available Muse:
 
-    $ muselsl stream  
+    muselsl stream  
 
 To connect to a specific Muse you can pass the name of the device as an argument. Device names can be found on the inside of the left earpiece (e.g. Muse-41D2):
 
-    $ muselsl stream --name YOUR_DEVICE_NAME
+    muselsl stream --name YOUR_DEVICE_NAME
 
 You can also directly pass the MAC address of your Muse. This provides the benefit of bypassing the device discovery step and can make connecting to devices quicker and more reliable:
 
-    $ muselsl stream --address YOUR_DEVICE_ADDRESS
+    muselsl stream --address YOUR_DEVICE_ADDRESS
 
 ### Working with Streaming Data
 
@@ -57,21 +57,17 @@ Once an LSL stream is created, you have access to the following commands.
 
 To view data:
 
-    $ muselsl view
-
-If the visualization freezes or is laggy, you can also try the alternate version 2 of the viewer. *Note: this will require the additional [vispy](https://github.com/vispy/vispy) and [mne](https://github.com/mne-tools/mne-python) dependencies*
-
-    $ muselsl view --version 2
+    muselsl view
 
 To record EEG data into a CSV:
 
-    $ muselsl record --duration 60  
+    muselsl record --duration 60  
 
 *Note: this command will also save data from any LSL stream containing 'Markers' data, such as from the stimulus presentation scripts in [EEG Notebooks](https://github.com/neurotechx/eeg-notebooks)*
 
 Alternatively, you can record data directly without using LSL through the following command:
 
-    $ muselsl record_direct --duration 60
+    muselsl record_direct --duration 60
 
 _Note: direct recording does not allow 'Markers' data to be recorded_
 
