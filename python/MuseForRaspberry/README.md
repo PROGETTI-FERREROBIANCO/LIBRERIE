@@ -1,6 +1,3 @@
-
-[![DOI](https://zenodo.org/badge/80209610.svg)](https://zenodo.org/badge/latestdoi/80209610)
-
 # Muse LSL
 
 A Python package for streaming, visualizing, and recording EEG data from the Muse devices developed by InteraXon.
@@ -167,5 +164,3 @@ Lab Streaming Layer or LSL is a system designed to unify the collection of time 
   url          = {https://doi.org/10.5281/zenodo.3228861}
 }
 ```
-
-> Alexandre Barachant, Dano Morrison, Hubert Banville, Jason Kowaleski, Uri Shaked, Sylvain Chevallier, & Juan Jesús Torre Tresols. (2019, May 25). muse-lsl (Version v2.0.2). Zenodo. http://doi.org/10.5281/zenodo.3228861
