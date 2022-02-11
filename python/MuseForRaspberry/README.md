@@ -23,9 +23,12 @@ _Note: if you run into any issues, first check out out [Common Issues](#common-i
 
 ### Installation
 
-Install Muse LSL with pip
+To install our library follow the following steps:
+* Download the *MuseForRaspberry* folder.
+* Open the terminal and enter in the *MuseForRaspberry* folder
+* Issue the following command: **`sudo python3 setup.py install`**
 
-    pip install muselsl
+To uninstall it use the command: **`pip uninstall muselsl`**.
 
 ### Setting Up a Stream
 
