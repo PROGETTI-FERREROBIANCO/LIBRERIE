@@ -28,7 +28,7 @@ To install our library follow the following steps:
 * Open the terminal and enter in the *MuseForRaspberry* folder
 * Issue the following command: **`sudo python3 setup.py install`**
 
-To uninstall it use the command: **`pip uninstall muselsl`**.
+To uninstall it use the command: **`sudo pip uninstall muselsl`**.
 
 ### Setting Up a Stream
 
