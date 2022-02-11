@@ -2,6 +2,9 @@
 
 A Python package for streaming, visualizing, and recording EEG data from the Muse devices developed by InteraXon.
 
+## Citing muse-lsl
+**This library is a modification of the `muselsl` library of Alexandre Barachant.**
+
 ![Blinks](blinks.png)
 
 ## Requirements
@@ -109,17 +112,7 @@ To record data from an alternate data source:
 
 *Note: The record process will only record from one data type at a time. However, multiple terminals or processes can be used to record from multiple data types simultaneously*
 
-## What is LSL?
-
-Lab Streaming Layer or LSL is a system designed to unify the collection of time series data for research experiments. It has become standard in the field of EEG-based brain-computer interfaces for its ability to make seperate streams of data available on a network with time synchronization and near real-time access. For more information, check out this [lecture from Modern Brain-Computer Interface Design](https://www.youtube.com/watch?v=Y1at7yrcFW0) or the [LSL repository](https://github.com/sccn/labstreaminglayer)
-
 ## Common Issues
-
-### Mac and Windows
-
-1.  Connection issues with BLED112 dongle:
-
-- You may need to use the `--interface` argument to provide the appropriate COM port value for the BLED112 device. The default value is COM9. To setup or view the device's COM port go to your OS's system settings
 
 ### Linux
 
@@ -144,6 +137,4 @@ Lab Streaming Layer or LSL is a system designed to unify the collection of time 
 - This appears to be due to Linux-specific issues with the newest version of pylsl. Ensure that you have pylsl 1.10.5 installed in the environment in which you are trying to run Muse LSL
 - If this is preceded by `Could not instantiate IPv4 stack: getrandom`, it could be [this issue](https://github.com/boostorg/uuid/issues/91) which can be resolved by building `liblsl` with `-DBOOST_UUID_RANDOM_PROVIDER_FORCE_POSIX` (e.g. by editing `standalone_compilation_linux.sh`)
 
-## Citing muse-lsl
-**This library is a modification of the `muselsl` library of Alexandre Barachant.**
 
