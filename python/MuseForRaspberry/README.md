@@ -145,20 +145,5 @@ Lab Streaming Layer or LSL is a system designed to unify the collection of time 
 - If this is preceded by `Could not instantiate IPv4 stack: getrandom`, it could be [this issue](https://github.com/boostorg/uuid/issues/91) which can be resolved by building `liblsl` with `-DBOOST_UUID_RANDOM_PROVIDER_FORCE_POSIX` (e.g. by editing `standalone_compilation_linux.sh`)
 
 ## Citing muse-lsl
+**This library is a modification of the `muselsl` library of Alexandre Barachant.**
 
-```
-@misc{muse-lsl,
-  author       = {Alexandre Barachant and
-                  Dano Morrison and
-                  Hubert Banville and
-                  Jason Kowaleski and
-                  Uri Shaked and
-                  Sylvain Chevallier and
-                  Juan Jesús Torre Tresols},
-  title        = {muse-lsl},
-  month        = may,
-  year         = 2019,
-  doi          = {10.5281/zenodo.3228861},
-  url          = {https://doi.org/10.5281/zenodo.3228861}
-}
-```
