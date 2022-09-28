@@ -82,12 +82,11 @@ The code to perform these experiments is still available, but is now maintained 
 
 If you want to create a websocket server that will transmit the data received from the muse use this function:
 
-```
+```Python
 from muselsl import muse_data_websocket
 
 # Note: Streaming is synchronous
 muse_data_websocket("MuseS-672E", "127.0.0.1", 2000)
-
 ```
 
 If you want to integrate Muse LSL into your own Python project, you can import and use its functions as you would any Python library. Examples are available in the `examples` folder:
