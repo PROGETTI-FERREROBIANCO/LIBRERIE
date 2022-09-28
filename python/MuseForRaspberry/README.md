@@ -34,10 +34,6 @@ To uninstall it use the command: **`sudo pip uninstall muselsl`**.
 
 On Windows 10, we recommend using the [BlueMuse](https://github.com/kowalej/BlueMuse/tree/master/Dist) GUI to set up an LSL stream. On Mac and Linux, the easiest way to get Muse data is to use Muse LSL directly from the command line. Use the `-h` flag to get a comprehensive list of all commands and options.
 
-T create a websocket server that will transmit the data received from the muse use this function:
-
-    muselsl muse_data_websocket
-
 To print a list of available muses:
 
     muselsl list
@@ -92,6 +88,9 @@ from muselsl import muse_data_websocket
 # Note: Streaming is synchronous
 muse_data_websocket("MuseS-672E", "127.0.0.1", 2000)
 ```
+Alternatively use this terminal command:
+
+    muselsl muse_data_websocket
 
 If you want to integrate Muse LSL into your own Python project, you can import and use its functions as you would any Python library. Examples are available in the `examples` folder:
 
