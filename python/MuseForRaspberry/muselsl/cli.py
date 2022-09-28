@@ -213,3 +213,31 @@ class CLI:
         from . import view
         view(args.window, args.scale, args.refresh, args.figure,
              args.backend)
+
+    def muse_data_websocket(self):
+        parser = argparse.ArgumentParser(
+            description='Creates a websocket that transmits the data collected by the muse.')
+        parser.add_argument(
+            "-n",
+            "--name",
+            dest="name",
+            type=str,
+            default="MuseS-672E",
+            help="Device name muse.")
+        parser.add_argument(
+            "-i",
+            "--ip",
+            dest="ip",
+            type=str,
+            default="127.0.0.1",
+            help="Ip address of websocket.")
+        parser.add_argument(
+            "-p",
+            "--port",
+            dest="port",
+            type=int,
+            default=2000,
+            help="Port of websocket.")
+        args = parser.parse_args(sys.argv[2:])
+        from . import muse_data_websocket
+        muse_data_websocket(args.name, args.ip, args.port)

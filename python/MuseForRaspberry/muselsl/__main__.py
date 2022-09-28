@@ -37,6 +37,11 @@ def main():
                 -a --address    Device MAC address.
                 -n --name       Device name (e.g. Muse-41D2).
                 -i --interface  The interface to use, 'hci0' for gatt or a com port for bgapi.
+
+    muse_data_websocket      Creates a websocket that transmits the data collected by the muse.
+                -n --name       Device name muse.
+                -i --ip         Ip address of websocket.
+                -p --port       Port of websocket.
         ''')
 
     parser.add_argument('command', help='Command to run.')

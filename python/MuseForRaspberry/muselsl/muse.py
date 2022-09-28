@@ -225,8 +225,8 @@ class Muse():
 
     def disconnect(self):
         """disconnect."""
-
-        self.device.disconnect()
+        try: self.device.disconnect()
+        except: pass
         if self.adapter:
             self.adapter.stop()
 

@@ -1,18 +1,25 @@
+from copy import deepcopy
 import re
 import subprocess
 from time import time, sleep
 from functools import partial
 from shutil import which
-
-from pylsl import StreamInfo, StreamOutlet
-
+import threading
+import asyncio
+import os
+import websockets
+from pylsl import StreamInfo, StreamOutlet, StreamInlet, resolve_byprop
 from .muse import Muse
 from .constants import MUSE_SCAN_TIMEOUT, AUTO_DISCONNECT_DELAY,  \
     MUSE_NB_EEG_CHANNELS, MUSE_SAMPLING_EEG_RATE, LSL_EEG_CHUNK,  \
     MUSE_NB_PPG_CHANNELS, MUSE_SAMPLING_PPG_RATE, LSL_PPG_CHUNK, \
     MUSE_NB_ACC_CHANNELS, MUSE_SAMPLING_ACC_RATE, LSL_ACC_CHUNK, \
-    MUSE_NB_GYRO_CHANNELS, MUSE_SAMPLING_GYRO_RATE, LSL_GYRO_CHUNK, NUM_MAX_DISPOSITIVI_VICINANZE
+    MUSE_NB_GYRO_CHANNELS, MUSE_SAMPLING_GYRO_RATE, LSL_GYRO_CHUNK, NUM_MAX_DEVICES_NEARBY, LSL_SCAN_TIMEOUT
 
+
+
+
+data_sensor = '{"EEG":{"data":-1, "timestamp":-1}, "PPG":{"data":-1, "timestamp":-1}, "ACC":{"data":-1, "timestamp":-1}, "GYRO":{"data":-1, "timestamp":-1}}'
 
 def _print_muse_list(muses):
     for m in muses:
@@ -28,7 +35,7 @@ def list_muses(interface=None):
         return _list_muses_bluetoothctl(MUSE_SCAN_TIMEOUT)
 
 
-def _list_muses_bluetoothctl(timeout, verbose=False):
+def _list_muses_bluetoothctl(timeout, verbose=True, verbose_timeout=False):
     """Identify Muse BLE devices using bluetoothctl.
 
     When using backend='gatt' on Linux, pygatt relies on the command line tool
@@ -48,7 +55,7 @@ def _list_muses_bluetoothctl(timeout, verbose=False):
 
     # Run scan using pexpect as subprocess.run returns immediately in jupyter
     # notebooks
-    print('Searching for Muses, this may take up to 10 seconds...')
+    if verbose: print('Searching for Muses, this may take up to 10 seconds...')
     scan = pexpect.spawn('bluetoothctl scan on')
     try:
         scan.expect('foooooo', timeout=timeout)
@@ -57,8 +64,7 @@ def _list_muses_bluetoothctl(timeout, verbose=False):
         msg = f'Unexpected error when scanning: {before_eof}'
         raise ValueError(msg)
     except pexpect.TIMEOUT:
-        if verbose:
-            print(scan.before.decode('utf-8', 'replace').split('\r\n'))
+        if verbose_timeout: print(scan.before.decode('utf-8', 'replace').split('\r\n'))
 
     # List devices using bluetoothctl
     list_devices_cmd = ['bluetoothctl', 'devices']
@@ -66,13 +72,14 @@ def _list_muses_bluetoothctl(timeout, verbose=False):
         list_devices_cmd, stdout=subprocess.PIPE).stdout.decode(
             'utf-8').split('\n')
 
-    if(len(devices)-1 > NUM_MAX_DISPOSITIVI_VICINANZE): print("POTREBBERO ESSERCI DEGLI ERRORI NELLA CONNESIONE, DOVUTI ALLA PRESENZA DI TROPPI DISPOSITIVI NELLE VICINANZE")
+    if(len(devices)-1 > NUM_MAX_DEVICES_NEARBY): 
+        if verbose: print("There may be errors in the connection, due to the presence of too many devices nearby.")
 
     muses = [{
             'name': re.findall('Muse.*', string=d)[0],
             'address': re.findall(r'..:..:..:..:..:..', string=d)[0]
         } for d in devices if 'Muse' in d]
-    _print_muse_list(muses)
+    if verbose: _print_muse_list(muses)
 
     return muses
 
@@ -205,3 +212,148 @@ def stream(
                 break
 
         print('Disconnected.')
+
+
+
+
+def muse_data_websocket(name, address_ws, port_ws):
+    global data_sensor
+
+    web_socket_server = WebSocketServer(address_ws=address_ws, port_ws=port_ws)
+    web_socket_server.start()
+
+    while True:
+        found_muse = find_muse(name)
+        if not found_muse: pass
+        else:
+            address = found_muse['address']
+            name = found_muse['name']
+
+
+            eeg_samples = []
+            ppg_samples = []
+            acc_samples = []
+            gyro_samples = []
+
+            lock_eeg = threading.Lock()
+            lock_ppg = threading.Lock()
+            lock_acc = threading.Lock()
+            lock_gyro = threading.Lock()
+
+
+            def save_data(data, timestamps, outlet, lock):
+                with lock:
+                    if type(data) != list: data = data.tolist()
+                    if type(timestamps) != list: timestamps = timestamps.tolist()
+
+                    for sample, timestamp in zip(data, timestamps):
+                        outlet.append({"data":sample, "timestamp":timestamp})
+
+
+            save_eeg = partial(save_data, outlet=eeg_samples, lock=lock_eeg)
+            save_ppg = partial(save_data, outlet=ppg_samples, lock=lock_ppg)
+            save_acc = partial(save_data, outlet=acc_samples, lock=lock_acc)
+            save_gyro = partial(save_data, outlet=gyro_samples, lock=lock_gyro)
+
+            muse = Muse(address, callback_eeg=save_eeg, callback_ppg=save_ppg, callback_acc=save_acc, callback_gyro=save_gyro)
+            didConnect = muse.connect()
+            if(didConnect):
+                print("Connected")
+                muse.start()
+
+                data_sensor_temporary = {}
+
+                sleep(1)
+
+                
+
+                while True:
+
+                    data_sensor_temporary["EEG"] = get_data(eeg_samples, lock_eeg)
+                    data_sensor_temporary["PPG"] = get_data(ppg_samples, lock_ppg)
+                    data_sensor_temporary["ACC"] = get_data(acc_samples, lock_acc)
+                    data_sensor_temporary["GYRO"] = get_data(gyro_samples, lock_gyro)
+
+                    if data_sensor_temporary["EEG"] == {"data":-1, "timestamp":-1} and data_sensor_temporary["PPG"] == {"data":-1, "timestamp":-1} and  data_sensor_temporary["ACC"] == {"data":-1, "timestamp":-1} and  data_sensor_temporary["GYRO"] == {"data":-1, "timestamp":-1}:
+                        data_sensor = '{"EEG":{"data":-1, "timestamp":-1}, "PPG":{"data":-1, "timestamp":-1}, "ACC":{"data":-1, "timestamp":-1}, "GYRO":{"data":-1, "timestamp":-1}}'
+                        try: muse.stop()
+                        except: pass
+                        try: muse.disconnect()
+                        except: pass
+                        try: del muse
+                        except: pass
+                        muse=None
+                        print("Muse timeout\nDisconnected")
+                        sleep(1)
+                        os.system("systemctl stop bluetooth")
+                        sleep(3)
+                        os.system("systemctl start bluetooth")
+                        sleep(1)
+                        break
+
+            
+                    data_sensor = str(data_sensor_temporary)
+
+                    
+
+                    #print(data_sensor)
+
+
+
+def get_data(array_samples, lock):
+    sleep(0.03) # to be increased in case of problems
+    with lock:
+        if len(array_samples) > 0: 
+            sample = deepcopy(array_samples.pop(len(array_samples)-1))
+            array_samples.clear()
+            return sample
+
+        else: return {"data":-1, "timestamp":-1}
+
+
+
+def pull_chunk_sensor_data(var_inlet, var_chunk_length, var_data_source, var_temporary_data_sensor):
+    try:
+        data, timestamp = var_inlet.pull_chunk(timeout=2.0,max_samples=var_chunk_length)
+        if timestamp: var_temporary_data_sensor[var_data_source] = {"data": data[0], "timestamp": timestamp[0]}
+    except Exception as error: print(error)
+
+
+def pull_sample_marker_data(var_inlet_marker, var_temporary_data_sensor):
+    try:
+        marker, timestamp = var_inlet_marker.pull_sample(timeout=2.0)
+        if timestamp: var_temporary_data_sensor["marker"] = {"data": marker[0], "timestamp": timestamp[0]}
+    except Exception as error: print(error)
+
+
+
+class ErrorMuseTimeout(Exception):
+    pass
+
+class WebSocketServer(threading.Thread):
+    def __init__(self, address_ws, port_ws):
+        threading.Thread.__init__(self)
+        self.address_ws = address_ws
+        self.port_ws = port_ws
+        self.start_server = None
+        self.loop = None
+
+    def run(self):
+
+        print(f"Web socket started on ('{self.address_ws}',{self.port_ws})")
+
+        async def handler(websocket, path):
+            dict_prev_data_sensor = {"EEG":{"timestamp":-1}}
+            while True:
+                dict_data_sensor = eval(data_sensor)
+                if dict_data_sensor["EEG"]["timestamp"] != dict_prev_data_sensor["EEG"]["timestamp"]:
+                    await websocket.send(str(dict_data_sensor))
+                dict_prev_data_sensor = dict_data_sensor
+                sleep(0.05)
+
+        self.loop = asyncio.new_event_loop()
+        self.start_server = websockets.serve(handler, self.address_ws, self.port_ws, loop=self.loop)
+        self.loop.run_until_complete(self.start_server)
+        self.loop.run_forever()
+        #asyncio.get_event_loop().run_until_complete(self.start_server)
+        #asyncio.get_event_loop().run_forever()
